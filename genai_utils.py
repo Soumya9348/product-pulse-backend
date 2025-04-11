@@ -2,8 +2,12 @@ from openai import OpenAI
 import os
 from dotenv import load_dotenv
 
+# Load environment variables
 load_dotenv()
-openai.api_key = os.getenv("OPENAI_API_KEY")
+api_key = os.getenv("OPENAI_API_KEY")
+
+# Create OpenAI client instance
+client = OpenAI(api_key=api_key)
 
 def summarize_reviews(reviews: str) -> str:
     prompt = f"""
@@ -16,18 +20,15 @@ def summarize_reviews(reviews: str) -> str:
     {reviews}
     """
 
-    client = OpenAI()
-    
     response = client.chat.completions.create(
         model="gpt-3.5-turbo",
         messages=[
-            {"role": "system", "content": "Summarize the following reviews..."},
-            {"role": "user", "content": reviews}
+            {"role": "system", "content": "You're a helpful assistant that summarizes product reviews."},
+            {"role": "user", "content": prompt}
         ]
     )
-    
-    summary = response.choices[0].message.content
-    return summary
+
+    return response.choices[0].message.content.strip()
 
 def answer_question(reviews: str, question: str) -> str:
     prompt = f"""
@@ -38,9 +39,13 @@ def answer_question(reviews: str, question: str) -> str:
     {question}
     """
 
-    response = openai.ChatCompletion.create(
+    response = client.chat.completions.create(
         model="gpt-3.5-turbo",
-        messages=[{"role": "user", "content": prompt}],
+        messages=[
+            {"role": "system", "content": "You're a helpful assistant that answers questions about product reviews."},
+            {"role": "user", "content": prompt}
+        ],
         temperature=0.5
     )
+
     return response.choices[0].message.content.strip()
