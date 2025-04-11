@@ -1,4 +1,4 @@
-import openai
+from openai import OpenAI
 import os
 from dotenv import load_dotenv
 
@@ -16,12 +16,18 @@ def summarize_reviews(reviews: str) -> str:
     {reviews}
     """
 
-    response = openai.ChatCompletion.create(
+    client = OpenAI()
+    
+    response = client.chat.completions.create(
         model="gpt-3.5-turbo",
-        messages=[{"role": "user", "content": prompt}],
-        temperature=0.7
+        messages=[
+            {"role": "system", "content": "Summarize the following reviews..."},
+            {"role": "user", "content": reviews}
+        ]
     )
-    return response.choices[0].message.content.strip()
+    
+    summary = response.choices[0].message.content
+    return summary
 
 def answer_question(reviews: str, question: str) -> str:
     prompt = f"""
